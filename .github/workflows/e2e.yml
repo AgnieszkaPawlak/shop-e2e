@@ -1,5 +1,5 @@
 name: E2E Tests
-
+run-name: E2E ${{ inputs.app_version }}
 on:
   workflow_dispatch:
     inputs:
