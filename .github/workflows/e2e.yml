@@ -11,6 +11,10 @@ on:
         description: Expected Git SHA
         required: true
         type: string
+
+      test_grep:
+        required: true
+        type: string
 jobs:
   test:
     runs-on: ubuntu-latest
@@ -40,6 +44,10 @@ jobs:
         env:
           BASE_URL: ${{ inputs.base_url }}
           APP_VERSION: ${{ inputs.app_version }}
-        run: npx playwright test --shard=${{ matrix.shard }}/4
+          TEST_GREP: ${{ inputs.test_grep }}
+        run: |
+          npx playwright test \
+            --grep "$TEST_GREP" \
+            --shard=${{ matrix.shard }}/4
         
 
