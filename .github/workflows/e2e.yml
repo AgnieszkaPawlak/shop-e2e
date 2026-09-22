@@ -1,20 +1,36 @@
 name: E2E Tests
+
 run-name: E2E ${{ inputs.app_version }}
+
 on:
   workflow_dispatch:
     inputs:
+      environment:
+        description: Environment under test
+        required: true
+        type: string
+
       base_url:
         description: Application URL
         required: true
         type: string
+
       app_version:
-        description: Expected Git SHA
+        description: Expected application Git SHA
         required: true
         type: string
 
       test_grep:
+        description: Playwright tag expression
         required: true
         type: string
+
+      test_grep_invert:
+        description: Tags that must not run
+        required: false
+        default: ""
+        type: string
+
 jobs:
   test:
     runs-on: ubuntu-latest
@@ -22,7 +38,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        shard: [1,2,3,4]
+        shard: [1, 2, 3, 4]
 
     steps:
       - name: Checkout
@@ -45,9 +61,15 @@ jobs:
           BASE_URL: ${{ inputs.base_url }}
           APP_VERSION: ${{ inputs.app_version }}
           TEST_GREP: ${{ inputs.test_grep }}
+          TEST_GREP_INVERT: ${{ inputs.test_grep_invert }}
         run: |
-          npx playwright test \
-            --grep "$TEST_GREP" \
-            --shard=${{ matrix.shard }}/4
-        
+          ARGS=(
+            --grep "$TEST_GREP"
+            --shard="${{ matrix.shard }}/4"
+          )
 
+          if [ -n "$TEST_GREP_INVERT" ]; then
+            ARGS+=(--grep-invert "$TEST_GREP_INVERT")
+          fi
+
+          npx playwright test "${ARGS[@]}"
