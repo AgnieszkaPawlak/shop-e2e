@@ -18,6 +18,8 @@ test.describe('Staging', () => {
     await expect(page.getByText('Backend status: UP')).toBeVisible();
     await expect(page.getByText('Application version: loading...')).toHaveCount(0);
     await expect(page.getByText('Backend unavailable')).toHaveCount(0);
-    await expect(  page.getByText(`Application version: ${process.env.APP_VERSION}`);
+    await expect(
+      page.getByText(`Application version: ${process.env.APP_VERSION}`)
+    ).toBeVisible();
   });
 });
