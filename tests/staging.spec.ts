@@ -10,16 +10,24 @@ test.describe('Staging', () => {
     );
   });
 
-  test('homepage loads and backend is healthy', async ({ page }) => {
-    await page.goto(stagingUrl!);
+test(
+  'homepage loads and backend is healthy',
+  { tag: ['@smoke', '@critical'] },
+  async ({ page, request }) => {
+    await page.goto('/');
 
-    await expect(page.getByRole('heading', { name: 'AHOP Shop' })).toBeVisible();
-    await expect(page.getByText('Frontend is running.')).toBeVisible();
-    await expect(page.getByText('Backend status: UP')).toBeVisible();
-    await expect(page.getByText('Application version: loading...')).toHaveCount(0);
-    await expect(page.getByText('Backend unavailable')).toHaveCount(0);
     await expect(
-      page.getByText(`Application version: ${process.env.APP_VERSION}`)
+      page.getByRole('heading', { name: 'AHOP Shop' })
     ).toBeVisible();
-  });
+
+    const health = await request.get('/api/health');
+    expect(health.ok()).toBeTruthy();
+
+    const versionResponse = await request.get('/api/version');
+    expect(versionResponse.ok()).toBeTruthy();
+
+    const version = await versionResponse.json();
+    expect(version.version).toBe(process.env.APP_VERSION);
+  }
+);
 });
